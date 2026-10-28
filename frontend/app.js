@@ -32,6 +32,98 @@ let currentCustomerName = "";
 let currentCustomerEmail = "";
 let selectedPaymentMethod = "upi";
 
+const fallbackMovies = [
+    {
+        id: "m1",
+        title: "Pushpa 2: The Rule",
+        genre: "Action",
+        duration_minutes: 175,
+        base_price: 295,
+        description: "Pushpa Raj expands his red sandalwood empire while clashing with SP Bhanwar Singh in an explosive face-off."
+    },
+    {
+        id: "m2",
+        title: "Kalki 2898 AD",
+        genre: "Sci-Fi",
+        duration_minutes: 181,
+        base_price: 250,
+        description: "In a dystopian world, the bounty hunter Bhairava and protector Ashwatthama battle over destiny."
+    },
+    {
+        id: "m3",
+        title: "Devara: Part 1",
+        genre: "Action",
+        duration_minutes: 178,
+        base_price: 250,
+        description: "A courageous coastal warrior defends his people and traditions against treacherous forces."
+    },
+    {
+        id: "m4",
+        title: "RRR",
+        genre: "Drama",
+        duration_minutes: 187,
+        base_price: 220,
+        description: "Two legendary Indian revolutionaries join forces against British colonial rule in an epic saga."
+    },
+    {
+        id: "m5",
+        title: "Tillu Square",
+        genre: "Comedy",
+        duration_minutes: 125,
+        base_price: 180,
+        description: "DJ Tillu gets tangled in a hilarious web of international espionage and quirky romance."
+    },
+    {
+        id: "m6",
+        title: "Sita Ramam",
+        genre: "Romance",
+        duration_minutes: 163,
+        base_price: 190,
+        description: "An orphaned soldier and an anonymous letter-writer discover a deeply touching love story."
+    },
+    {
+        id: "m7",
+        title: "Hi Nanna",
+        genre: "Drama",
+        duration_minutes: 155,
+        base_price: 190,
+        description: "A devoted father and his daughter form an emotional bond with a compassionate stranger."
+    },
+    {
+        id: "m8",
+        title: "Salaar: Part 1 - Ceasefire",
+        genre: "Action",
+        duration_minutes: 175,
+        base_price: 240,
+        description: "A hardened fighter enters the lawless city of Khansaar to fulfill an unbreakable vow of loyalty."
+    }
+];
+
+function generateFallbackShowtimes(movieId) {
+    const movie = fallbackMovies.find(m => m.id === movieId);
+    const times = [];
+    const now = new Date();
+    const hours = [11, 14, 18, 21];
+    const mins = [0, 30, 30, 45];
+
+    for (let day = 0; day < 5; day++) {
+        for (let s = 0; s < 4; s++) {
+            const d = new Date(now);
+            d.setDate(now.getDate() + day);
+            d.setHours(hours[s], mins[s], 0, 0);
+
+            if (d > now) {
+                times.push({
+                    id: `st_${movieId}_${day}_${s}`,
+                    starts_at: d.toISOString(),
+                    ticket_price: movie ? movie.base_price : 220
+                });
+            }
+        }
+    }
+    return times;
+}
+
 const money = value =>
     new Intl.NumberFormat("en-IN", {
         style: "currency",
@@ -40,21 +132,73 @@ const money = value =>
     }).format(Number(value));
 
 async function apiRequest(path, options = {}) {
-    const response = await fetch(`${API}${path}`, {
-        ...options,
-        headers: {
-            ...(options.body ? { "Content-Type": "application/json" } : {}),
-            ...options.headers
+    try {
+        const response = await fetch(`${API}${path}`, {
+            ...options,
+            headers: {
+                ...(options.body ? { "Content-Type": "application/json" } : {}),
+                ...options.headers
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
         }
-    });
 
-    const data = await response.json().catch(() => ({}));
+        return await response.json();
+    } catch (err) {
+        // Fallback for static hosting (GitHub Pages)
+        if (path === "/movies") {
+            return fallbackMovies;
+        }
 
-    if (!response.ok) {
-        throw new Error(data.error || "Something went wrong. Please try again.");
+        if (path.startsWith("/movies/") && path.endsWith("/showtimes")) {
+            const match = path.match(/\/movies\/([^/]+)\/showtimes/);
+            return generateFallbackShowtimes(match ? match[1] : "");
+        }
+
+        if (path.startsWith("/showtimes/") && path.endsWith("/seats")) {
+            return { bookedSeats: ["A3", "A4", "C7"] };
+        }
+
+        if (path === "/bookings" && options.method === "POST") {
+            const body = JSON.parse(options.body || "{}");
+            const hex = Math.random().toString(16).substring(2, 14).toUpperCase().padEnd(12, "F");
+            const ref = `MB-${hex}`;
+            const total = (body.seatNumbers || []).length * (selectedShowtime ? selectedShowtime.ticket_price : 200);
+
+            const record = {
+                bookingReference: ref,
+                movieTitle: selectedMovie ? selectedMovie.title : "Telugu Cinema",
+                startsAt: selectedShowtime ? selectedShowtime.starts_at : new Date().toISOString(),
+                seatNumbers: body.seatNumbers || [],
+                totalAmount: total,
+                status: "confirmed",
+                customerEmail: body.customerEmail
+            };
+
+            const saved = JSON.parse(localStorage.getItem("moviebox_bookings") || "[]");
+            saved.push(record);
+            localStorage.setItem("moviebox_bookings", JSON.stringify(saved));
+
+            return {
+                bookingReference: ref,
+                totalAmount: total,
+                status: "confirmed"
+            };
+        }
+
+        if (path.startsWith("/bookings/")) {
+            const match = path.match(/\/bookings\/([^?]+)/);
+            const ref = match ? decodeURIComponent(match[1]) : "";
+            const saved = JSON.parse(localStorage.getItem("moviebox_bookings") || "[]");
+            const found = saved.find(b => b.bookingReference === ref);
+            if (found) return found;
+            throw new Error("No ticket found with this reference.");
+        }
+
+        throw new Error(err.message || "Failed to load.");
     }
-
-    return data;
 }
 
 function showMessage(element, message, type = "") {
@@ -70,7 +214,7 @@ async function loadMovies() {
         populateGenres();
         renderMovies();
         showMessage(movieStatus,
-            movies.length ? "" : "No Telugu movies found in database.");
+            movies.length ? "" : "No Telugu movies found.");
     } catch (error) {
         showMessage(movieStatus, error.message, "error");
     }
@@ -352,7 +496,6 @@ document.getElementById("booking-form").addEventListener("submit", event => {
 
     const total = selectedSeats.size * selectedShowtime.ticket_price;
 
-    // Fill Payment Modal details
     document.getElementById("modal-movie-title").textContent = selectedMovie.title;
     document.getElementById("modal-showtime-text").textContent =
         `Screen 1 • ${new Date(selectedShowtime.starts_at).toLocaleString("en-IN", {
@@ -365,7 +508,6 @@ document.getElementById("booking-form").addEventListener("submit", event => {
     payConfirmBtn.disabled = false;
     payConfirmBtn.classList.remove("hidden");
 
-    // Open Payment Modal
     paymentModal.classList.remove("hidden");
 });
 
@@ -414,11 +556,9 @@ payConfirmBtn.addEventListener("click", async () => {
     paymentProcessingText.textContent = `Connecting to ${methodLabels[selectedPaymentMethod]} gateway...`;
 
     try {
-        // Realistic step 1: verification
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 700));
         paymentProcessingText.textContent = "Verifying payment authorization...";
 
-        // Step 2: call backend to create booking in Supabase
         const booking = await apiRequest("/bookings", {
             method: "POST",
             body: JSON.stringify({
@@ -429,11 +569,10 @@ payConfirmBtn.addEventListener("click", async () => {
             })
         });
 
-        await new Promise(r => setTimeout(r, 700));
+        await new Promise(r => setTimeout(r, 600));
         paymentProcessingText.textContent = "Payment approved! Generating ticket...";
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 300));
 
-        // Close payment modal
         paymentModal.classList.add("hidden");
 
         // Populate Ticket Modal
@@ -453,10 +592,8 @@ payConfirmBtn.addEventListener("click", async () => {
         document.getElementById("lookup-reference").value = booking.bookingReference;
         document.getElementById("lookup-email").value = currentCustomerEmail;
 
-        // Show Ticket Modal
         ticketModal.classList.remove("hidden");
 
-        // Clear selections and refresh seat map
         selectedSeats.clear();
         await selectShowtime(selectedShowtime.id);
 
@@ -480,17 +617,14 @@ payConfirmBtn.addEventListener("click", async () => {
     }
 });
 
-// CLOSE TICKET MODAL
 closeTicketModalBtn.addEventListener("click", () => {
     ticketModal.classList.add("hidden");
 });
 
-// PRINT / SAVE TICKET
 printTicketBtn.addEventListener("click", () => {
     window.print();
 });
 
-// BOOK ANOTHER SHOW
 newBookingBtn.addEventListener("click", () => {
     ticketModal.classList.add("hidden");
     selectedMovie = null;
