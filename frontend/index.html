@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Book Telugu movie tickets online with instant seat selection and secure UPI, card & net banking payment.">
+    <title>MovieBox | Telugu Movie Ticket Booking</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <header class="navbar">
+        <a class="brand" href="#">
+            <span class="brand-icon">🎬</span>
+            <div class="brand-text">
+                <span class="brand-title">MovieBox</span>
+                <span class="brand-subtitle">Tollywood Cinema</span>
+            </div>
+        </a>
+        <nav>
+            <a href="#movies">Telugu Movies</a>
+            <a href="#booking">Book Seats</a>
+            <a href="#my-booking">My Ticket</a>
+        </nav>
+        <a href="#movies" class="nav-button">Book Now</a>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <span class="eyebrow">✨ MANA TOLLYWOOD CINEMA</span>
+                <h1>Big stories.<br>Pure <span>Telugu entertainment.</span></h1>
+                <p>Catch the biggest Telugu blockbusters on the giant screen with Dolby Atmos. Choose your favourite seats and book in seconds.</p>
+                <div class="hero-actions">
+                    <a href="#movies" class="primary-button">Explore Telugu Movies →</a>
+                    <a href="#my-booking" class="secondary-button">Find Existing Ticket</a>
+                </div>
+                <div class="hero-pills">
+                    <span class="pill">⚡ Instant UPI & Cards</span>
+                    <span class="pill">💺 Live Seat Selection</span>
+                    <span class="pill">🎟️ Digital M-Ticket</span>
+                </div>
+            </div>
+            <div class="hero-art" aria-hidden="true">
+                <div class="pastel-badge-card">
+                    <div class="film-banner">NOW TRENDING</div>
+                    <strong>Pushpa 2 · Kalki · Devara</strong>
+                    <div class="ticket-mini-cut">
+                        <span>Screen 1 • 4K Dolby Atmos</span>
+                        <span class="stars">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="movies">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">NOW SHOWING IN THEATRES</span>
+                    <h2>Trending Telugu Movies</h2>
+                    <p>Pick a movie, select your preferred theatre showtime, and enjoy the show.</p>
+                </div>
+                <span class="live-tag"><span></span> 8 Blockbusters Live</span>
+            </div>
+
+            <div class="filters">
+                <input id="search-input" type="search"
+                    placeholder="Search by movie title..." aria-label="Search movies">
+                <select id="genre-filter" aria-label="Filter by genre">
+                    <option value="">All Genres</option>
+                </select>
+            </div>
+
+            <div id="movie-status" class="message" role="status" aria-live="polite">
+                Loading Telugu movies...
+            </div>
+            <div id="movie-list" class="movie-grid"></div>
+        </section>
+
+        <section class="booking-section" id="booking">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">CHOOSE YOUR SPOT</span>
+                    <h2>Select Your Seats</h2>
+                    <p id="selected-movie-description">Select a movie above to view showtimes and seating layout.</p>
+                </div>
+            </div>
+
+            <div class="booking-layout">
+                <div class="booking-main">
+                    <div class="form-group">
+                        <label for="showtime-select">Select Showtime (Screen 1 - Dolby Atmos)</label>
+                        <select id="showtime-select" disabled>
+                            <option value="">Choose a movie first</option>
+                        </select>
+                    </div>
+
+                    <div id="seat-area" class="seat-area hidden">
+                        <div class="screen-wrapper">
+                            <div class="screen-curve"></div>
+                            <div class="screen-label">ALL EYES THIS WAY • CINEMA SCREEN</div>
+                        </div>
+
+                        <div id="seat-map" class="seat-map"></div>
+
+                        <div class="seat-legend">
+                            <span><i class="legend-seat available"></i> Available</span>
+                            <span><i class="legend-seat selected"></i> Selected</span>
+                            <span><i class="legend-seat booked"></i> Booked</span>
+                        </div>
+                    </div>
+
+                    <div id="seat-status" class="message" role="status" aria-live="polite">
+                        Select a movie above to view available seats.
+                    </div>
+                </div>
+
+                <aside class="booking-summary">
+                    <span class="eyebrow">BOOKING DETAILS</span>
+                    <h3>Order Summary</h3>
+                    <p id="summary-movie" class="summary-movie">No movie selected</p>
+
+                    <div class="summary-card">
+                        <div class="summary-line">
+                            <span>Language</span><strong>Telugu (2D)</strong>
+                        </div>
+                        <div class="summary-line">
+                            <span>Showtime</span><strong id="summary-time">—</strong>
+                        </div>
+                        <div class="summary-line">
+                            <span>Seats Selected</span><strong id="summary-seats">None</strong>
+                        </div>
+                        <div class="summary-line total-line">
+                            <span>Total Payable</span><strong id="summary-total">₹0.00</strong>
+                        </div>
+                    </div>
+
+                    <form id="booking-form">
+                        <div class="form-group">
+                            <label for="customer-name">Full Name</label>
+                            <input id="customer-name" name="name"
+                                type="text" maxlength="80" required
+                                autocomplete="name" placeholder="Enter your full name">
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Email Address</label>
+                            <input id="customer-email" name="email"
+                                type="email" maxlength="254" required
+                                autocomplete="email" placeholder="name@example.com">
+                        </div>
+                        <button id="book-button" class="primary-button full-button"
+                            type="submit" disabled>Proceed to Payment →</button>
+                    </form>
+                    <div class="trust-badge">
+                        <span>🔒 100% Safe & Secure Checkout</span>
+                        <div class="payment-icons-preview">UPI · Cards · Net Banking · Wallets</div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <section class="section history-section" id="my-booking">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">TICKET RETRIEVAL</span>
+                    <h2>Download / Check Your Ticket</h2>
+                    <p>Enter your booking reference ID and email to view your confirmed ticket.</p>
+                </div>
+            </div>
+            <form id="lookup-form" class="lookup-form">
+                <div class="form-group">
+                    <label for="lookup-reference">Booking Reference</label>
+                    <input id="lookup-reference" required
+                        placeholder="e.g. MB-A1B2C3D4E5F6">
+                </div>
+                <div class="form-group">
+                    <label for="lookup-email">Registered Email</label>
+                    <input id="lookup-email" type="email" required
+                        placeholder="name@example.com">
+                </div>
+                <button class="primary-button" type="submit">Search Ticket</button>
+            </form>
+            <div id="lookup-result" class="message" role="status" aria-live="polite"></div>
+        </section>
+    </main>
+
+    <!-- PAYMENT MODAL (All methods except cash) -->
+    <div id="payment-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="payment-modal-title">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow">SECURE CHECKOUT</span>
+                    <h3 id="payment-modal-title">Select Payment Method</h3>
+                </div>
+                <button id="close-payment-modal" class="modal-close" aria-label="Close modal">✕</button>
+            </div>
+
+            <div class="payment-order-bar">
+                <div>
+                    <strong id="modal-movie-title">Movie Title</strong>
+                    <div id="modal-showtime-text" class="text-muted">Showtime</div>
+                </div>
+                <div class="modal-price-box">
+                    <span>Payable Amount</span>
+                    <strong id="modal-total-amount">₹0.00</strong>
+                </div>
+            </div>
+
+            <div class="payment-tabs-container">
+                <div class="payment-methods-sidebar" role="tablist">
+                    <button class="payment-tab active" data-method="upi" role="tab" aria-selected="true">
+                        <span class="tab-icon">📱</span>
+                        <span>UPI / QR</span>
+                        <small>GPay, PhonePe, Paytm</small>
+                    </button>
+                    <button class="payment-tab" data-method="card" role="tab" aria-selected="false">
+                        <span class="tab-icon">💳</span>
+                        <span>Debit / Credit Card</span>
+                        <small>Visa, Mastercard, RuPay</small>
+                    </button>
+                    <button class="payment-tab" data-method="netbanking" role="tab" aria-selected="false">
+                        <span class="tab-icon">🏦</span>
+                        <span>Net Banking</span>
+                        <small>SBI, HDFC, ICICI & more</small>
+                    </button>
+                    <button class="payment-tab" data-method="wallet" role="tab" aria-selected="false">
+                        <span class="tab-icon">👛</span>
+                        <span>Wallets</span>
+                        <small>Paytm, Amazon Pay</small>
+                    </button>
+                </div>
+
+                <div class="payment-tab-content">
+                    <!-- UPI Panel -->
+                    <div id="panel-upi" class="tab-panel active">
+                        <div class="upi-header">
+                            <span>Scan QR Code with any UPI App</span>
+                            <span class="fast-tag">Instant Confirmation</span>
+                        </div>
+                        <div class="qr-container">
+                            <div class="mock-qr-code" id="mock-qr">
+                                <div class="qr-pattern"></div>
+                                <span class="qr-center-icon">UPI</span>
+                            </div>
+                            <div class="qr-instructions">
+                                <p>Scan with <strong>Google Pay</strong>, <strong>PhonePe</strong>, or <strong>Paytm</strong></p>
+                                <div class="upi-apps-row">
+                                    <span class="app-chip">Google Pay</span>
+                                    <span class="app-chip">PhonePe</span>
+                                    <span class="app-chip">Paytm</span>
+                                    <span class="app-chip">BHIM</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="or-separator"><span>OR ENTER UPI ID</span></div>
+
+                        <div class="form-group">
+                            <label for="upi-id-input">Virtual Payment Address (VPA)</label>
+                            <div class="input-with-button">
+                                <input id="upi-id-input" type="text" placeholder="example@okhdfcbank" value="nikhitha@okaxis">
+                                <span class="input-tag">Verified</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Panel -->
+                    <div id="panel-card" class="tab-panel hidden">
+                        <div class="form-group">
+                            <label for="card-number">Card Number</label>
+                            <input id="card-number" type="text" maxlength="19" placeholder="4123 4567 8901 2345" value="4532 8920 1209 8452">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="card-expiry">Expiry Date</label>
+                                <input id="card-expiry" type="text" maxlength="5" placeholder="MM/YY" value="08/28">
+                            </div>
+                            <div class="form-group">
+                                <label for="card-cvv">CVV</label>
+                                <input id="card-cvv" type="password" maxlength="3" placeholder="123" value="789">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="card-name">Cardholder Name</label>
+                            <input id="card-name" type="text" placeholder="Name on card" value="V Nikhitha">
+                        </div>
+                        <div class="card-icons-row">
+                            <span class="card-pill">RuPay</span>
+                            <span class="card-pill">VISA</span>
+                            <span class="card-pill">Mastercard</span>
+                        </div>
+                    </div>
+
+                    <!-- Net Banking Panel -->
+                    <div id="panel-netbanking" class="tab-panel hidden">
+                        <label class="section-label">Select Your Bank</label>
+                        <div class="bank-grid">
+                            <label class="bank-option">
+                                <input type="radio" name="bank" value="SBI" checked>
+                                <span class="bank-card">State Bank of India</span>
+                            </label>
+                            <label class="bank-option">
+                                <input type="radio" name="bank" value="HDFC">
+                                <span class="bank-card">HDFC Bank</span>
+                            </label>
+                            <label class="bank-option">
+                                <input type="radio" name="bank" value="ICICI">
+                                <span class="bank-card">ICICI Bank</span>
+                            </label>
+                            <label class="bank-option">
+                                <input type="radio" name="bank" value="Axis">
+                                <span class="bank-card">Axis Bank</span>
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="other-banks">All Other Banks</label>
+                            <select id="other-banks">
+                                <option value="">Choose bank...</option>
+                                <option value="Kotak">Kotak Mahindra Bank</option>
+                                <option value="PNB">Punjab National Bank</option>
+                                <option value="Canara">Canara Bank</option>
+                                <option value="Union">Union Bank of India</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Wallets Panel -->
+                    <div id="panel-wallet" class="tab-panel hidden">
+                        <label class="section-label">Popular Digital Wallets</label>
+                        <div class="wallet-list">
+                            <label class="wallet-option">
+                                <input type="radio" name="wallet" value="Paytm" checked>
+                                <div class="wallet-info">
+                                    <strong>Paytm Wallet</strong>
+                                    <span>Fast 1-click checkout</span>
+                                </div>
+                            </label>
+                            <label class="wallet-option">
+                                <input type="radio" name="wallet" value="AmazonPay">
+                                <div class="wallet-info">
+                                    <strong>Amazon Pay Balance</strong>
+                                    <span>Instant payment</span>
+                                </div>
+                            </label>
+                            <label class="wallet-option">
+                                <input type="radio" name="wallet" value="PhonePe">
+                                <div class="wallet-info">
+                                    <strong>PhonePe Wallet</strong>
+                                    <span>Zero convenience fee</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div id="payment-processing" class="payment-processing hidden">
+                    <div class="spinner"></div>
+                    <span id="payment-processing-text">Contacting payment gateway...</span>
+                </div>
+                <button id="pay-confirm-button" class="primary-button full-button pay-button">
+                    <span class="lock-icon">🔒</span> Pay <span id="pay-button-amount">₹0.00</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DIGITAL TICKET SUCCESS MODAL -->
+    <div id="ticket-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+        <div class="ticket-card">
+            <div class="ticket-header">
+                <span class="ticket-badge">✓ PAYMENT SUCCESSFUL</span>
+                <button id="close-ticket-modal" class="modal-close" aria-label="Close ticket">✕</button>
+            </div>
+
+            <div class="ticket-body">
+                <div class="ticket-movie-banner">
+                    <span class="ticket-tag">TOLLYWOOD CINEMA PASS</span>
+                    <h2 id="ticket-movie-title">Movie Title</h2>
+                    <p id="ticket-movie-meta" class="text-muted">Telugu • 2D • Screen 1 (Dolby Atmos)</p>
+                </div>
+
+                <div class="ticket-cut-line">
+                    <div class="cut-circle left"></div>
+                    <div class="dashed-line"></div>
+                    <div class="cut-circle right"></div>
+                </div>
+
+                <div class="ticket-details-grid">
+                    <div class="detail-item">
+                        <span>BOOKING ID</span>
+                        <strong id="ticket-reference" class="highlight-code">MB-XXXXXXXXXXXX</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>SHOWTIME</span>
+                        <strong id="ticket-showtime">—</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>SEAT NUMBERS</span>
+                        <strong id="ticket-seats" class="highlight-seats">—</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>TOTAL PAID</span>
+                        <strong id="ticket-total">₹0.00</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>GUEST NAME</span>
+                        <strong id="ticket-customer-name">—</strong>
+                    </div>
+                    <div class="detail-item">
+                        <span>STATUS</span>
+                        <strong class="status-confirmed">CONFIRMED ✓</strong>
+                    </div>
+                </div>
+
+                <div class="ticket-qr-section">
+                    <div class="ticket-qr-box">
+                        <div class="barcode">
+                            <span class="bar"></span><span class="bar wide"></span><span class="bar"></span>
+                            <span class="bar wide"></span><span class="bar"></span><span class="bar wide"></span>
+                            <span class="bar"></span><span class="bar wide"></span><span class="bar"></span>
+                        </div>
+                        <small>Scan this pass at cinema turnstile gate</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-actions">
+                <button id="print-ticket-button" class="primary-button">🖨️ Print / Save Ticket</button>
+                <button id="new-booking-button" class="secondary-button">Book Another Show</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-brand">
+            <span class="brand-icon">🎬</span>
+            <strong>MovieBox Telugu</strong>
+        </div>
+        <p>Premium Telugu Cinema Ticketing • Andhra Pradesh & Telangana Theatres</p>
+        <p>© <span id="current-year"></span> MovieBox · Demo Application</p>
+    </footer>
+</body>
+</html>
